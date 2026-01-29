@@ -1,0 +1,3089 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Boat Safari</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        :root {
+            --primary: #1fbfd6;
+            --primary-light: #4dd0e1;
+            --primary-dark: #00acc1;
+            --secondary: #f6c453;
+            --secondary-light: #ffd54f;
+            --dark-blue: #0e3a5b;
+            --navy: #0b1c2c;
+            --light: #f7fbff;
+            --text-light: #d7e6f1;
+            --text-muted: #8fa6b6;
+            --card: #ffffff;
+            --line: #e6eef5;
+            --bg: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            --accent: #ff6b6b;
+            --success: #51cf66;
+            --warning: #ffd43b;
+            --danger: #ff6b6b;
+            --info: #339af0;
+            --shadow-light: rgba(0, 0, 0, 0.05);
+            --shadow-medium: rgba(0, 0, 0, 0.1);
+            --shadow-heavy: rgba(0, 0, 0, 0.2);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg);
+            min-height: 100vh;
+            color: #333;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Background decorative elements */
+        body::before {
+            content: '';
+            position: fixed;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(31, 191, 214, 0.05) 0%, transparent 50%);
+            z-index: -2;
+            animation: float 20s ease-in-out infinite;
+        }
+
+        body::after {
+            content: '';
+            position: fixed;
+            top: 20%;
+            right: -10%;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(246, 196, 83, 0.08) 0%, transparent 70%);
+            border-radius: 50%;
+            z-index: -1;
+            animation: float 15s ease-in-out infinite reverse;
+        }
+
+        /* Floating elements animation */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-15px) rotate(5deg); }
+        }
+
+        .floating-element {
+            animation: float 6s ease-in-out infinite;
+        }
+
+        /* Slide-up Animation Styles */
+        .slide-up {
+            opacity: 0;
+            transform: translateY(50px);
+            transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        .slide-up.animate {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .slide-up.delay-1 { transition-delay: 0.1s; }
+        .slide-up.delay-2 { transition-delay: 0.2s; }
+        .slide-up.delay-3 { transition-delay: 0.3s; }
+        .slide-up.delay-4 { transition-delay: 0.4s; }
+        .slide-up.delay-5 { transition-delay: 0.5s; }
+        .slide-up.delay-6 { transition-delay: 0.6s; }
+
+        /* Navigation */
+        .navbar {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(15px);
+            padding: 1rem 2rem;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.15);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            border-bottom: 2px solid rgba(31, 191, 214, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .navbar:hover {
+            box-shadow: 0 6px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.6rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary), var(--dark-blue));
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            transition: all 0.3s ease;
+        }
+
+        .logo:hover {
+            transform: scale(1.05);
+        }
+
+        .logo i {
+            font-size: 2.2rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: float 4s ease-in-out infinite;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #333;
+            font-weight: 600;
+            padding: 8px 16px;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary);
+            background: rgba(31, 191, 214, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            bottom: 3px;
+            left: 50%;
+            transform: translateX(-50%);
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a:hover::after {
+            width: 70%;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logout-btn {
+            background: linear-gradient(135deg, var(--danger), #c0392b);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 700;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .logout-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .logout-btn:hover::before {
+            left: 100%;
+        }
+
+        .logout-btn:hover {
+            background: linear-gradient(135deg, #c0392b, #a93226);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
+        }
+
+        /* Main Container */
+        .main-container {
+            margin-top: 80px;
+            padding: 2rem;
+            max-width: 1400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Dashboard Header */
+        .dashboard-header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(15px);
+            padding: 3rem;
+            border-radius: 20px;
+            margin-bottom: 2rem;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.15);
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .dashboard-header::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 6px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary), var(--primary));
+            background-size: 200% 100%;
+            animation: shimmer 3s ease-in-out infinite;
+        }
+
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+
+        .dashboard-title {
+            font-size: 3rem;
+            background: linear-gradient(135deg, var(--dark-blue), var(--primary));
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.8rem;
+            font-weight: 800;
+        }
+
+        .dashboard-subtitle {
+            color: var(--text-muted);
+            font-size: 1.2rem;
+            font-weight: 500;
+        }
+
+        /* Quick Stats */
+        .quick-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(15px);
+            padding: 1.2rem;
+            border-radius: 16px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+            text-align: center;
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            position: relative;
+            overflow: hidden;
+            min-height: 140px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, currentColor, transparent);
+            opacity: 0.4;
+        }
+
+        .stat-card::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: all 0.3s ease;
+            z-index: 0;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-6px) scale(1.03);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.18);
+        }
+
+        .stat-card:hover::after {
+            width: 120px;
+            height: 120px;
+        }
+
+        .stat-icon {
+            font-size: 2.2rem;
+            margin-bottom: 0.8rem;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 56px;
+            height: 56px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            position: relative;
+            z-index: 2;
+        }
+
+        .stat-card:hover .stat-icon {
+            transform: scale(1.15) rotate(8deg);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+        }
+
+        .stat-card.users .stat-icon { 
+            color: var(--info);
+            background: linear-gradient(135deg, rgba(51, 154, 240, 0.1), rgba(51, 154, 240, 0.05));
+        }
+        .stat-card.trips .stat-icon { 
+            color: var(--success);
+            background: linear-gradient(135deg, rgba(81, 207, 102, 0.1), rgba(81, 207, 102, 0.05));
+        }
+        .stat-card.bookings .stat-icon { 
+            color: var(--warning);
+            background: linear-gradient(135deg, rgba(255, 212, 59, 0.1), rgba(255, 212, 59, 0.05));
+        }
+        .stat-card.revenue .stat-icon { 
+            color: var(--danger);
+            background: linear-gradient(135deg, rgba(255, 107, 107, 0.1), rgba(255, 107, 107, 0.05));
+        }
+        .stat-card.staff .stat-icon { 
+            color: #9b59b6;
+            background: linear-gradient(135deg, rgba(155, 89, 182, 0.1), rgba(155, 89, 182, 0.05));
+        }
+
+        /* Responsive adjustments for stat cards */
+        @media (max-width: 1200px) {
+            .quick-stats {
+                grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+                gap: 0.8rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .quick-stats {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 0.8rem;
+            }
+            
+            .stat-card {
+                padding: 1rem;
+                min-height: 120px;
+            }
+            
+            .stat-icon {
+                font-size: 1.8rem;
+                width: 48px;
+                height: 48px;
+                margin-bottom: 0.6rem;
+            }
+            
+            .stat-number {
+                font-size: 1.5rem;
+            }
+            
+            .stat-label {
+                font-size: 0.7rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .quick-stats {
+                grid-template-columns: 1fr;
+                gap: 0.6rem;
+            }
+            
+            .stat-card {
+                padding: 0.8rem;
+                min-height: 100px;
+                border-radius: 12px;
+            }
+            
+            .stat-icon {
+                font-size: 1.6rem;
+                width: 40px;
+                height: 40px;
+                margin-bottom: 0.4rem;
+            }
+            
+            .stat-number {
+                font-size: 1.3rem;
+                margin-bottom: 0.2rem;
+            }
+            
+            .stat-label {
+                font-size: 0.65rem;
+            }
+        }
+
+        .stat-number {
+            font-size: 1.8rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--dark-blue), var(--primary));
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.4rem;
+            line-height: 1;
+            position: relative;
+            z-index: 2;
+        }
+
+        .stat-label {
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            line-height: 1.2;
+            position: relative;
+            z-index: 2;
+        }
+
+        /* Tab Navigation */
+        .tab-navigation {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(15px);
+            padding: 1.5rem;
+            border-radius: 20px;
+            margin-bottom: 2rem;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .tab-buttons {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            background: rgba(255, 255, 255, 0.8);
+            border: 2px solid rgba(31, 191, 214, 0.2);
+            color: var(--text-muted);
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .tab-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .tab-btn:hover::before {
+            left: 100%;
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            border-color: var(--primary);
+            box-shadow: 0 6px 20px rgba(31, 191, 214, 0.3);
+        }
+
+        .tab-btn:hover:not(.active) {
+            border-color: var(--primary);
+            color: var(--primary);
+            background: rgba(31, 191, 214, 0.1);
+            transform: translateY(-2px);
+        }
+
+        /* Tab Content */
+        .tab-content {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(15px);
+            padding: 3rem;
+            border-radius: 20px;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.15);
+            min-height: 500px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            position: relative;
+        }
+
+        .tab-pane {
+            display: none;
+        }
+
+        .tab-pane.active {
+            display: block;
+        }
+
+        /* Section Headers */
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #eee;
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+            background: linear-gradient(135deg, var(--dark-blue), var(--primary));
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 700;
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-bottom: 1.5rem;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 700;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            font-size: 14px;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            box-shadow: 0 4px 15px rgba(31, 191, 214, 0.3);
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, var(--dark-blue), var(--navy));
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(31, 191, 214, 0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, var(--success), #2ecc71);
+            color: white;
+            box-shadow: 0 4px 15px rgba(81, 207, 102, 0.3);
+        }
+
+        .btn-success:hover {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(81, 207, 102, 0.4);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, var(--warning), #f39c12);
+            color: white;
+            box-shadow: 0 4px 15px rgba(255, 212, 59, 0.3);
+        }
+
+        .btn-warning:hover {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(255, 212, 59, 0.4);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, var(--danger), #e74c3c);
+            color: white;
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+        }
+
+        .btn-danger:hover {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(255, 107, 107, 0.4);
+        }
+
+        .btn-info {
+            background: linear-gradient(135deg, var(--info), #3498db);
+            color: white;
+            box-shadow: 0 4px 15px rgba(51, 154, 240, 0.3);
+        }
+
+        .btn-info:hover {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(51, 154, 240, 0.4);
+        }
+
+        /* Small action buttons */
+        .btn-small {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.8rem;
+            margin: 0 0.2rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 32px;
+            height: 32px;
+        }
+
+        .btn-small i {
+            font-size: 0.9rem;
+        }
+
+        .btn-small.btn-primary {
+            background: #3498db;
+            color: white;
+        }
+
+        .btn-small.btn-primary:hover {
+            background: #2980b9;
+        }
+
+        .btn-small.btn-warning {
+            background: #f39c12;
+            color: white;
+        }
+
+        .btn-small.btn-warning:hover {
+            background: #e67e22;
+        }
+
+        .btn-small.btn-danger {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .btn-small.btn-danger:hover {
+            background: #c0392b;
+        }
+
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 0.2rem;
+        }
+
+        /* Small Buttons */
+        .btn-small {
+            padding: 0.5rem;
+            margin: 0 0.25rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 32px;
+            height: 32px;
+        }
+
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        /* Tables */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+            border: 2px solid rgba(31, 191, 214, 0.1);
+        }
+
+        .data-table th {
+            background: linear-gradient(135deg, var(--dark-blue), var(--primary));
+            color: white;
+            padding: 18px 25px;
+            text-align: left;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-size: 12px;
+            position: relative;
+        }
+
+        .data-table th::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, var(--secondary), var(--primary));
+        }
+
+        .data-table td {
+            padding: 18px 25px;
+            border-bottom: 1px solid rgba(31, 191, 214, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .data-table tbody tr {
+            transition: all 0.3s ease;
+        }
+
+        .data-table tbody tr:hover {
+            background: linear-gradient(135deg, rgba(31, 191, 214, 0.05), rgba(31, 191, 214, 0.02));
+            transform: translateX(3px);
+            box-shadow: 0 4px 15px rgba(31, 191, 214, 0.1);
+        }
+
+        .data-table tbody tr:nth-child(even) {
+            background: rgba(247, 251, 255, 0.5);
+        }
+
+        /* Status Badges */
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 25px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .status-badge:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .status-active {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-inactive {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-suspended {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .status-completed {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-available {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-maintenance {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-out-of-service {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .status-unknown {
+            background: #e2e3e5;
+            color: #495057;
+        }
+
+        .status-confirmed {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        /* Forms */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid rgba(31, 191, 214, 0.2);
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(5px);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: #fff;
+            box-shadow: 0 0 0 4px rgba(31, 191, 214, 0.1), 0 4px 20px rgba(31, 191, 214, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .form-control:hover {
+            border-color: var(--primary-light);
+        }
+
+        /* Charts */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .chart-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(15px);
+            padding: 1.2rem;
+            border-radius: 16px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .chart-container:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.18);
+        }
+
+        .chart-title {
+            font-size: 1.1rem;
+            background: linear-gradient(135deg, var(--dark-blue), var(--primary));
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 700;
+        }
+
+        .chart-container canvas {
+            max-height: 250px !important;
+            width: 100% !important;
+        }
+
+        /* Export Panel */
+        .export-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 1.5rem;
+            border-radius: 15px;
+            margin-bottom: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .export-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        /* Recent Exports Styles */
+        .no-exports {
+            text-align: center;
+            padding: 2rem;
+            color: #666;
+        }
+
+        .no-exports i {
+            font-size: 3rem;
+            color: #ddd;
+            margin-bottom: 1rem;
+        }
+
+        .recent-exports-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .recent-exports-header h4 {
+            margin: 0;
+            color: #333;
+        }
+
+        .exports-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .export-item {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .export-item:hover {
+            background: #e9ecef;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .export-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .export-header h4 {
+            margin: 0;
+            font-size: 1rem;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .export-badge {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 20px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .export-badge.export-pdf {
+            background: #dc3545;
+            color: white;
+        }
+
+        .export-badge.export-excel {
+            background: #28a745;
+            color: white;
+        }
+
+        .export-badge.export-csv {
+            background: #17a2b8;
+            color: white;
+        }
+
+        .export-badge.export-json {
+            background: #6c757d;
+            color: white;
+        }
+
+        .export-details {
+            margin-bottom: 1rem;
+        }
+
+        .export-meta {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            font-size: 0.875rem;
+            color: #666;
+        }
+
+        .export-meta span {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .export-actions {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: flex-end;
+        }
+
+        .export-actions .btn {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        /* Modals */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, rgba(42, 82, 152, 0.9), rgba(0, 188, 212, 0.8));
+            backdrop-filter: blur(20px);
+            animation: modalFadeIn 0.4s ease-out forwards;
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, 
+                rgba(255, 255, 255, 0.95) 0%, 
+                rgba(255, 255, 255, 0.9) 100%);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            margin: 3% auto;
+            padding: 0;
+            border-radius: 25px;
+            width: 90%;
+            max-width: 550px;
+            max-height: 85%;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 
+                0 25px 80px rgba(0, 0, 0, 0.3),
+                0 0 40px rgba(42, 82, 152, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.5);
+            animation: modalSlideIn 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+            transform: translateY(-50px) scale(0.9);
+            opacity: 0;
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #2a5298 0%, #00bcd4 100%);
+            color: white;
+            padding: 1.5rem 2rem;
+            border-radius: 25px 25px 0 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .modal-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            animation: shimmer 3s infinite;
+            pointer-events: none;
+        }
+
+        .modal-title {
+            margin: 0;
+            font-size: 1.4rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .modal-title i {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 0.5rem;
+            border-radius: 12px;
+            font-size: 1.2rem;
+        }
+
+        .modal-body {
+            padding: 2rem;
+            background: rgba(255, 255, 255, 0.05);
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+
+        .modal-body::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .modal-body::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 3px;
+        }
+
+        .modal-body::-webkit-scrollbar-thumb {
+            background: linear-gradient(45deg, #2a5298, #00bcd4);
+            border-radius: 3px;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+            animation: slideUpFade 0.6s ease-out forwards;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .form-group:nth-child(1) { animation-delay: 0.1s; }
+        .form-group:nth-child(2) { animation-delay: 0.2s; }
+        .form-group:nth-child(3) { animation-delay: 0.3s; }
+        .form-group:nth-child(4) { animation-delay: 0.4s; }
+        .form-group:nth-child(5) { animation-delay: 0.5s; }
+        .form-group:nth-child(6) { animation-delay: 0.6s; }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #2a5298;
+            font-size: 0.95rem;
+            position: relative;
+        }
+
+        .form-label::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 30px;
+            height: 2px;
+            background: linear-gradient(45deg, #2a5298, #00bcd4);
+            border-radius: 1px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            border: 2px solid rgba(42, 82, 152, 0.1);
+            border-radius: 12px;
+            font-size: 1rem;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #2a5298;
+            box-shadow: 
+                0 0 0 3px rgba(42, 82, 152, 0.1),
+                0 4px 12px rgba(42, 82, 152, 0.15);
+            transform: translateY(-1px);
+            background: rgba(255, 255, 255, 0.95);
+        }
+
+        .form-control[readonly] {
+            background: rgba(240, 242, 247, 0.8);
+            cursor: not-allowed;
+            color: #666;
+        }
+
+        .modal-footer {
+            padding: 1.5rem 2rem;
+            background: rgba(248, 250, 252, 0.8);
+            border-radius: 0 0 25px 25px;
+            border-top: 1px solid rgba(0, 0, 0, 0.05);
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+        }
+
+        .btn-modal {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            min-width: 120px;
+        }
+
+        .btn-modal::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            transition: all 0.6s ease;
+            transform: translate(-50%, -50%);
+        }
+
+        .btn-modal:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn-cancel {
+            background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
+        }
+
+        .btn-cancel:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(108, 117, 125, 0.4);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #2a5298 0%, #00bcd4 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(42, 82, 152, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(42, 82, 152, 0.4);
+        }
+
+        .close {
+            position: absolute;
+            right: 1.5rem;
+            top: 1.5rem;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 35px;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1.2rem;
+            z-index: 2;
+        }
+
+        .close:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: rotate(90deg) scale(1.1);
+        }
+
+        /* Modal Animations */
+        @keyframes modalFadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes modalSlideIn {
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        @keyframes slideUpFade {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+        }
+
+        /* Form Grid Layout */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .form-grid .form-group {
+            animation-delay: calc(var(--order, 0) * 0.1s);
+        }
+
+        .form-grid .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        /* Select styling for consistency */
+        .form-control select,
+        select.form-control {
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%232a5298' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 0.75rem center;
+            background-size: 1rem;
+            padding-right: 2.5rem;
+        }
+
+        /* Enhanced success/error states */
+        .form-control.success {
+            border-color: #28a745;
+            box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.1);
+        }
+
+        .form-control.error {
+            border-color: #dc3545;
+            box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1);
+        }
+
+        /* Loading overlay for modals */
+        .modal-loading {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(2px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            border-radius: 25px;
+        }
+
+        .modal-loading i {
+            font-size: 2rem;
+            color: #2a5298;
+            animation: spin 1s linear infinite;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .main-container {
+                padding: 1rem;
+            }
+
+            .nav-container {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .nav-links {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .tab-buttons {
+                justify-content: center;
+            }
+
+            .quick-stats {
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            }
+
+            .dashboard-title {
+                font-size: 2rem;
+            }
+
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .modal-content {
+                width: 95%;
+                margin: 2% auto;
+                border-radius: 20px;
+            }
+
+            .modal-body {
+                padding: 1.5rem;
+            }
+
+            .modal-header {
+                padding: 1rem 1.5rem;
+            }
+
+            .modal-footer {
+                padding: 1rem 1.5rem;
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+
+            .btn-modal {
+                width: 100%;
+            }
+
+            .form-group {
+                margin-bottom: 1.25rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .modal-content {
+                width: 98%;
+                margin: 1% auto;
+                border-radius: 15px;
+            }
+
+            .modal-title {
+                font-size: 1.2rem;
+            }
+
+            .close {
+                right: 1rem;
+                top: 1rem;
+                width: 30px;
+                height: 30px;
+                font-size: 1rem;
+            }
+        }
+
+        /* Loading States */
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: #666;
+        }
+
+        .loading i {
+            font-size: 2rem;
+            animation: spin 1s linear infinite;
+            margin-bottom: 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Payment History Specific Styles */
+        .filters-section {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .filter-section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(15px);
+            padding: 2rem;
+            border-radius: 16px;
+            margin: 2rem 0;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            position: relative;
+        }
+
+        .filter-section h4 {
+            color: var(--dark-blue);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--dark-blue), var(--primary));
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .filter-section .filter-grid {
+            display: grid;
+            grid-template-columns: 1fr 200px 200px auto;
+            gap: 1.5rem;
+            align-items: end;
+        }
+
+        .filters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .filter-group label {
+            font-weight: 600;
+            color: #2a5298;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .filter-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+        }
+
+        .table-container {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .payment-details-modal .modal-content {
+            max-width: 800px;
+        }
+
+        .payment-info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .payment-info-item {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 8px;
+            border-left: 4px solid #2a5298;
+        }
+
+        .payment-info-item strong {
+            color: #2a5298;
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Payment method badges */
+        .payment-method-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            text-transform: uppercase;
+        }
+
+        .payment-method-badge.credit_card {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+
+        .payment-method-badge.debit_card {
+            background: #f3e5f5;
+            color: #7b1fa2;
+        }
+
+        .payment-method-badge.paypal {
+            background: #fff3e0;
+            color: #f57c00;
+        }
+
+        .payment-method-badge.bank_transfer {
+            background: #e8f5e8;
+            color: #388e3c;
+        }
+
+        .payment-method-badge.cash {
+            background: #fafafa;
+            color: #424242;
+        }
+
+        /* Modal footer styles */
+        .modal-footer {
+            padding: 1.5rem 2rem;
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 0 0 25px 25px;
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+        }
+
+        .btn-modal {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn-modal.btn-primary {
+            background: #2a5298;
+            color: white;
+        }
+
+        .btn-modal.btn-primary:hover {
+            background: #1e3c72;
+        }
+
+        .btn-modal.btn-danger {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .btn-modal.btn-danger:hover {
+            background: #c0392b;
+        }
+
+        .btn-modal.btn-cancel {
+            background: #95a5a6;
+            color: white;
+        }
+
+        .btn-modal.btn-cancel:hover {
+            background: #7f8c8d;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">
+                <i class="fas fa-ship"></i>
+                <span>Boat Safari Admin</span>
+            </div>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="admin.html">Dashboard</a></li>
+                <li><a href="trips.html">Trips</a></li>
+                <li><a href="boat.html">Boats</a></li>
+                <li><a href="feedback-management.html">Feedback</a></li>
+                <li><a href="support.html">Support</a></li>
+            </ul>
+            <div class="user-info">
+                <span id="adminName">Administrator</span>
+                <button class="logout-btn" id="logoutBtn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    Logout
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Dashboard Header -->
+        <div class="dashboard-header slide-up">
+            <h1 class="dashboard-title">
+                <i class="fas fa-tachometer-alt"></i>
+                Admin Dashboard
+            </h1>
+            <p class="dashboard-subtitle">Complete system management and analytics overview</p>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="quick-stats slide-up delay-1">
+            <div class="stat-card users">
+                <div class="stat-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stat-number" id="totalUsers">0</div>
+                <div class="stat-label">Total Users</div>
+            </div>
+            <div class="stat-card trips">
+                <div class="stat-icon">
+                    <i class="fas fa-route"></i>
+                </div>
+                <div class="stat-number" id="totalTrips">0</div>
+                <div class="stat-label">Total Trips</div>
+            </div>
+            <div class="stat-card bookings">
+                <div class="stat-icon">
+                    <i class="fas fa-calendar-check"></i>
+                </div>
+                <div class="stat-number" id="totalBookings">0</div>
+                <div class="stat-label">Total Bookings</div>
+            </div>
+            <div class="stat-card revenue">
+                <div class="stat-icon">
+                    <i class="fas fa-dollar-sign"></i>
+                </div>
+                <div class="stat-number" id="totalRevenue">$0</div>
+                <div class="stat-label">Total Revenue</div>
+            </div>
+            <div class="stat-card boats">
+                <div class="stat-icon">
+                    <i class="fas fa-ship"></i>
+                </div>
+                <div class="stat-number" id="totalBoats">0</div>
+                <div class="stat-label">Total Boats</div>
+            </div>
+            <div class="stat-card staff">
+                <div class="stat-icon">
+                    <i class="fas fa-user-tie"></i>
+                </div>
+                <div class="stat-number" id="totalStaff">0</div>
+                <div class="stat-label">Staff Members</div>
+            </div>
+        </div>
+
+        <!-- Tab Navigation -->
+        <div class="tab-navigation slide-up delay-2">
+            <div class="tab-buttons">
+                <button class="tab-btn active" onclick="showTab('analytics')">
+                    <i class="fas fa-chart-area"></i>
+                    Analytics & Charts
+                </button>
+                <button class="tab-btn" onclick="showTab('users')">
+                    <i class="fas fa-users-cog"></i>
+                    User Management
+                </button>
+                <button class="tab-btn" onclick="showTab('trips')">
+                    <i class="fas fa-route"></i>
+                    Trip Management
+                </button>
+                <button class="tab-btn" onclick="showTab('bookings')">
+                    <i class="fas fa-calendar-check"></i>
+                    Booking Management
+                </button>
+                <button class="tab-btn" onclick="showTab('boats')">
+                    <i class="fas fa-ship"></i>
+                    Boat Management
+                </button>
+                <button class="tab-btn" onclick="showTab('staff-management')">
+                    <i class="fas fa-user-cog"></i>
+                    Staff Management
+                </button>
+                <button class="tab-btn" onclick="showTab('payment-history')">
+                    <i class="fas fa-credit-card"></i>
+                    Payment History
+                </button>
+                <button class="tab-btn" onclick="showTab('reports')">
+                    <i class="fas fa-file-export"></i>
+                    Export Reports
+                </button>
+            </div>
+        </div>
+
+        <!-- Tab Content -->
+        <div class="tab-content slide-up delay-3">
+            <!-- Analytics & Charts Tab -->
+            <div id="analytics" class="tab-pane active">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <i class="fas fa-chart-area"></i>
+                        System Analytics & Performance
+                    </h2>
+                </div>
+
+                <div class="charts-grid">
+                    <div class="chart-container">
+                        <h3 class="chart-title">
+                            <i class="fas fa-chart-line"></i>
+                            Booking Trends (Last 30 Days)
+                        </h3>
+                        <canvas id="bookingTrendsChart"></canvas>
+                    </div>
+
+                    <div class="chart-container">
+                        <h3 class="chart-title">
+                            <i class="fas fa-chart-pie"></i>
+                            User Distribution
+                        </h3>
+                        <canvas id="userDistributionChart"></canvas>
+                    </div>
+
+                    <div class="chart-container">
+                        <h3 class="chart-title">
+                            <i class="fas fa-chart-bar"></i>
+                            Monthly Revenue
+                        </h3>
+                        <canvas id="revenueChart"></canvas>
+                    </div>
+
+                    <div class="chart-container">
+                        <h3 class="chart-title">
+                            <i class="fas fa-chart-area"></i>
+                            Trip Performance
+                        </h3>
+                        <canvas id="tripPerformanceChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- User Management Tab -->
+            <div id="users" class="tab-pane">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <i class="fas fa-users-cog"></i>
+                        User Management
+                    </h2>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn btn-primary" onclick="openAddUserModal()">
+                        <i class="fas fa-user-plus"></i>
+                        Add User
+                    </button>
+                    <button class="btn btn-success" onclick="loadUsers()">
+                        <i class="fas fa-sync-alt"></i>
+                        Refresh
+                    </button>
+                    <button class="btn btn-info" onclick="exportUsers()">
+                        <i class="fas fa-download"></i>
+                        Export Users
+                    </button>
+                </div>
+
+                <!-- User Filter Section -->
+                <div class="filter-section">
+                    <h4>
+                        <i class="fas fa-filter"></i>
+                        Filter Users
+                    </h4>
+                    <div class="filter-grid">
+                        <div>
+                            <label for="userSearchInput" class="form-label">Search by Name or Email:</label>
+                            <input type="text" id="userSearchInput" placeholder="Type to search users..." 
+                                   class="form-control" 
+                                   onkeyup="filterUsers()">
+                        </div>
+                        <div>
+                            <label for="roleFilter" class="form-label">Role:</label>
+                            <select id="roleFilter" onchange="filterUsers()" class="form-control">
+                                <option value="">All Roles</option>
+                                <option value="ADMIN">Admin</option>
+                                <option value="CUSTOMER">Customer</option>
+                                <option value="SAFARI_GUIDE">Safari Guide</option>
+                                <option value="STAFF">Staff</option>
+                                <option value="IT_SUPPORT">IT Support</option>
+                                <option value="IT_ASSISTANT">IT Assistant</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="statusFilter" class="form-label">Status:</label>
+                            <select id="statusFilter" onchange="filterUsers()" class="form-control">
+                                <option value="">All Status</option>
+                                <option value="ACTIVE">Active</option>
+                                <option value="INACTIVE">Inactive</option>
+                            </select>
+                        </div>
+                        <div>
+                            <button onclick="clearUserFilters()" class="btn btn-danger">
+                                <i class="fas fa-times"></i> Clear
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="usersTableContainer">
+                    <table class="data-table" id="usersTable">
+                        <thead>
+                            <tr>
+                                <th>User ID</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                                <th>Status</th>
+                                <th>Registration Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersTableBody">
+                            <tr>
+                                <td colspan="7" class="loading">
+                                    <i class="fas fa-spinner"></i>
+                                    <div>Loading users...</div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Trip Management Tab -->
+            <div id="trips" class="tab-pane">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <i class="fas fa-route"></i>
+                        Trip Management
+                    </h2>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn btn-primary" onclick="openAddTripModal()">
+                        <i class="fas fa-plus"></i>
+                        Add Trip
+                    </button>
+                    <button class="btn btn-success" onclick="loadTrips()">
+                        <i class="fas fa-sync-alt"></i>
+                        Refresh
+                    </button>
+                    <button class="btn btn-info" onclick="exportTrips()">
+                        <i class="fas fa-download"></i>
+                        Export Trips
+                    </button>
+                </div>
+
+                <div id="tripsTableContainer">
+                    <table class="data-table" id="tripsTable">
+                        <thead>
+                            <tr>
+                                <th>Trip ID</th>
+                                <th>Date</th>
+                                <th>Start Time</th>
+                                <th>End Time</th>
+                                <th>Route</th>
+                                <th>Capacity</th>
+                                <th>Price</th>
+                                <th>Boat</th>
+                                <th>Guide</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tripsTableBody">
+                            <tr>
+                                <td colspan="11" class="loading">
+                                    <i class="fas fa-spinner"></i>
+                                    <div>Loading trips...</div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Booking Management Tab -->
+            <div id="bookings" class="tab-pane">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <i class="fas fa-calendar-check"></i>
+                        Booking Management
+                    </h2>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn btn-success" onclick="loadBookings()">
+                        <i class="fas fa-sync-alt"></i>
+                        Refresh
+                    </button>
+                    <button class="btn btn-info" onclick="exportBookings()">
+                        <i class="fas fa-download"></i>
+                        Export Bookings
+                    </button>
+                    <button class="btn btn-warning" onclick="generateBookingReport()">
+                        <i class="fas fa-chart-line"></i>
+                        Generate Report
+                    </button>
+                </div>
+
+                <div id="bookingsTableContainer">
+                    <table class="data-table" id="bookingsTable">
+                        <thead>
+                            <tr>
+                                <th>Booking ID</th>
+                                <th>Customer</th>
+                                <th>Trip</th>
+                                <th>Date</th>
+                                <th>Guests</th>
+                                <th>Total Amount</th>
+                                <th>Status</th>
+                                <th>Booking Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="bookingsTableBody">
+                            <tr>
+                                <td colspan="9" class="loading">
+                                    <i class="fas fa-spinner"></i>
+                                    <div>Loading bookings...</div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Boat Management Tab -->
+            <div id="boats" class="tab-pane">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <i class="fas fa-ship"></i>
+                        Boat Management
+                    </h2>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn btn-primary" onclick="openAddBoatModal()">
+                        <i class="fas fa-plus"></i>
+                        Add Boat
+                    </button>
+                    <button class="btn btn-success" onclick="loadBoats()">
+                        <i class="fas fa-sync-alt"></i>
+                        Refresh
+                    </button>
+                    <button class="btn btn-info" onclick="exportBoats()">
+                        <i class="fas fa-download"></i>
+                        Export Boats
+                    </button>
+                </div>
+
+                <!-- Boat Filter Section -->
+                <div class="filter-section">
+                    <h4>
+                        <i class="fas fa-filter"></i>
+                        Filter Boats
+                    </h4>
+                    <div class="filter-grid">
+                        <div>
+                            <label for="boatSearchInput" class="form-label">Search by Name or Registration:</label>
+                            <input type="text" id="boatSearchInput" placeholder="Type to search boats..." 
+                                   class="form-control"
+                                   onkeyup="filterBoats()">
+                        </div>
+                        <div>
+                            <label for="boatStatusFilter" class="form-label">Status:</label>
+                            <select id="boatStatusFilter" onchange="filterBoats()" class="form-control">
+                                <option value="">All Status</option>
+                                <option value="AVAILABLE">Available</option>
+                                <option value="MAINTENANCE">Maintenance</option>
+                                <option value="OUT_OF_SERVICE">Out of Service</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="boatTypeFilter" class="form-label">Type:</label>
+                            <select id="boatTypeFilter" onchange="filterBoats()" class="form-control">
+                                <option value="">All Types</option>
+                                <option value="Safari Boat">Safari Boat</option>
+                                <option value="Speed Boat">Speed Boat</option>
+                                <option value="Yacht">Yacht</option>
+                                <option value="Catamaran">Catamaran</option>
+                            </select>
+                        </div>
+                        <div>
+                            <button onclick="clearBoatFilters()" class="btn btn-danger">
+                                <i class="fas fa-times"></i> Clear
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="boatTableContainer">
+                    <table class="data-table" id="boatTable">
+                        <thead>
+                            <tr>
+                                <th>Boat ID</th>
+                                <th>Name</th>
+                                <th>Model</th>
+                                <th>Type</th>
+                                <th>Capacity</th>
+                                <th>Registration</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="boatTableBody">
+                            <tr>
+                                <td colspan="8" class="loading">
+                                    <i class="fas fa-spinner"></i>
+                                    <div>Loading boats...</div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Staff Management Tab -->
+            <div id="staff-management" class="tab-pane">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <i class="fas fa-user-cog"></i>
+                        Staff Management
+                    </h2>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn btn-primary" onclick="openAddStaffModal()">
+                        <i class="fas fa-user-plus"></i>
+                        Add Staff Member
+                    </button>
+                    <button class="btn btn-success" onclick="loadStaffMembers()">
+                        <i class="fas fa-sync-alt"></i>
+                        Refresh
+                    </button>
+                    <button class="btn btn-info" onclick="exportStaff()">
+                        <i class="fas fa-download"></i>
+                        Export Staff
+                    </button>
+                </div>
+
+                <div id="staffTableContainer">
+                    <table class="data-table" id="staffTable">
+                        <thead>
+                            <tr>
+                                <th>Staff ID</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                                <th>Phone</th>
+                                <th>Status</th>
+                                <th>Hire Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="staffTableBody">
+                            <tr>
+                                <td colspan="8" class="loading">
+                                    <i class="fas fa-spinner"></i>
+                                    <div>Loading staff members...</div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Boat Management Tab -->
+            <div id="boats" class="tab-pane">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <i class="fas fa-ship"></i>
+                        Boat Management
+                    </h2>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn btn-primary" onclick="openAddBoatModal()">
+                        <i class="fas fa-plus"></i>
+                        Add Boat
+                    </button>
+                    <button class="btn btn-success" onclick="loadBoats()">
+                        <i class="fas fa-sync-alt"></i>
+                        Refresh
+                    </button>
+                    <button class="btn btn-info" onclick="exportBoats()">
+                        <i class="fas fa-download"></i>
+                        Export Boats
+                    </button>
+                </div>
+
+                <!-- Boat Filter Section -->
+                <div class="filter-section">
+                    <h4>
+                        <i class="fas fa-filter"></i>
+                        Filter Boats
+                    </h4>
+                    <div class="filter-grid">
+                        <div>
+                            <label for="boatSearchInput" class="form-label">Search by Name or Model:</label>
+                            <input type="text" id="boatSearchInput" placeholder="Type to search boats..." 
+                                   class="form-control"
+                                   onkeyup="filterBoats()">
+                        </div>
+                        <div>
+                            <label for="boatStatusFilter" class="form-label">Status:</label>
+                            <select id="boatStatusFilter" onchange="filterBoats()" class="form-control">
+                                <option value="">All Status</option>
+                                <option value="AVAILABLE">Available</option>
+                                <option value="MAINTENANCE">Maintenance</option>
+                                <option value="OUT_OF_SERVICE">Out of Service</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="boatTypeFilter" class="form-label">Type:</label>
+                            <select id="boatTypeFilter" onchange="filterBoats()" class="form-control">
+                                <option value="">All Types</option>
+                                <option value="Safari Boat">Safari Boat</option>
+                                <option value="Speed Boat">Speed Boat</option>
+                                <option value="Yacht">Yacht</option>
+                                <option value="Catamaran">Catamaran</option>
+                            </select>
+                        </div>
+                        <div>
+                            <button onclick="clearBoatFilters()" class="btn btn-warning">
+                                <i class="fas fa-times"></i>
+                                Clear Filters
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="boatTableContainer">
+                    <table class="data-table" id="boatTable">
+                        <thead>
+                            <tr>
+                                <th>Boat ID</th>
+                                <th>Boat Name</th>
+                                <th>Model</th>
+                                <th>Type</th>
+                                <th>Capacity</th>
+                                <th>Registration</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="boatTableBody">
+                            <tr>
+                                <td colspan="8" class="loading">
+                                    <i class="fas fa-spinner"></i>
+                                    <div>Loading boats...</div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Export Reports Tab -->
+            <div id="reports" class="tab-pane">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <i class="fas fa-file-export"></i>
+                        Export Reports
+                    </h2>
+                </div>
+
+                <div class="export-panel">
+                    <h3>
+                        <i class="fas fa-chart-bar"></i>
+                        System Reports
+                    </h3>
+                    <p>Generate and export comprehensive reports for different aspects of your boat safari business.</p>
+                    
+                    <div class="export-options">
+                        <div class="form-group">
+                            <label for="reportType">Report Type:</label>
+                            <select class="form-control" id="reportType">
+                                <option value="bookings">Booking Report</option>
+                                <option value="revenue">Revenue Report</option>
+                                <option value="users">User Report</option>
+                                <option value="trips">Trip Report</option>
+                                <option value="staff">Staff Report</option>
+                                <option value="comprehensive">Comprehensive Report</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="dateFrom">From Date:</label>
+                            <input type="date" class="form-control" id="dateFrom">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="dateTo">To Date:</label>
+                            <input type="date" class="form-control" id="dateTo">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="exportFormat">Export Format:</label>
+                            <select class="form-control" id="exportFormat">
+                                <option value="pdf">PDF Report</option>
+                                <option value="excel">Excel Spreadsheet</option>
+                                <option value="csv">CSV File</option>
+                                <option value="json">JSON Data</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="action-buttons">
+                        <button class="btn btn-primary" onclick="generateReport()">
+                            <i class="fas fa-file-alt"></i>
+                            Generate Report
+                        </button>
+                        <button class="btn btn-success" onclick="exportAllData()">
+                            <i class="fas fa-database"></i>
+                            Export All Data
+                        </button>
+                        <button class="btn btn-info" onclick="scheduleReport()">
+                            <i class="fas fa-clock"></i>
+                            Schedule Report
+                        </button>
+                    </div>
+                </div>
+
+                <div class="export-panel">
+                    <h3>
+                        <i class="fas fa-history"></i>
+                        Recent Exports
+                    </h3>
+                    <div id="recentExports">
+                        <p>No recent exports available.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Payment History Tab -->
+            <div id="payment-history" class="tab-pane">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <i class="fas fa-credit-card"></i>
+                        Payment History
+                    </h2>
+                    <div class="action-buttons">
+                        <button class="btn btn-primary" onclick="refreshPaymentHistory()">
+                            <i class="fas fa-sync-alt"></i>
+                            Refresh
+                        </button>
+                        <button class="btn btn-success" onclick="exportPaymentHistory()">
+                            <i class="fas fa-file-export"></i>
+                            Export
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Payment Filters -->
+                <div class="filters-section">
+                    <div class="filters-grid">
+                        <div class="filter-group">
+                            <label for="paymentStatusFilter">Payment Status:</label>
+                            <select id="paymentStatusFilter" class="form-control">
+                                <option value="">All Statuses</option>
+                                <option value="PAID">Paid</option>
+                                <option value="PENDING">Pending</option>
+                                <option value="FAILED">Failed</option>
+                                <option value="REFUNDED">Refunded</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label for="paymentMethodFilter">Payment Method:</label>
+                            <select id="paymentMethodFilter" class="form-control">
+                                <option value="">All Methods</option>
+                                <option value="CREDIT_CARD">Credit Card</option>
+                                <option value="DEBIT_CARD">Debit Card</option>
+                                <option value="PAYPAL">PayPal</option>
+                                <option value="BANK_TRANSFER">Bank Transfer</option>
+                                <option value="CASH">Cash</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label for="customerNameFilter">Customer Name:</label>
+                            <input type="text" id="customerNameFilter" class="form-control" placeholder="Enter customer name...">
+                        </div>
+                        <div class="filter-group">
+                            <label for="customerEmailFilter">Customer Email:</label>
+                            <input type="text" id="customerEmailFilter" class="form-control" placeholder="Enter customer email...">
+                        </div>
+                        <div class="filter-group">
+                            <label for="dateFromFilter">From Date:</label>
+                            <input type="date" id="dateFromFilter" class="form-control">
+                        </div>
+                        <div class="filter-group">
+                            <label for="dateToFilter">To Date:</label>
+                            <input type="date" id="dateToFilter" class="form-control">
+                        </div>
+                    </div>
+                    <div class="filter-actions">
+                        <button class="btn btn-primary" onclick="applyPaymentFilters()">
+                            <i class="fas fa-filter"></i>
+                            Apply Filters
+                        </button>
+                        <button class="btn btn-secondary" onclick="clearPaymentFilters()">
+                            <i class="fas fa-times"></i>
+                            Clear Filters
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Payment History Table -->
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Payment ID</th>
+                                <th>Booking ID</th>
+                                <th>Customer</th>
+                                <th>Trip</th>
+                                <th>Amount</th>
+                                <th>Payment Method</th>
+                                <th>Status</th>
+                                <th>Payment Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="paymentHistoryTableBody">
+                            <tr>
+                                <td colspan="9" class="loading">
+                                    <i class="fas fa-spinner"></i>
+                                    <div>Loading payment history...</div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add User Modal -->
+    <div id="addUserModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">
+                    <i class="fas fa-user-plus"></i>
+                    Add New User
+                </h3>
+                <button class="close" onclick="closeModal('addUserModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="addUserForm">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label" for="firstName">First Name:</label>
+                            <input type="text" class="form-control" id="firstName" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="lastName">Last Name:</label>
+                            <input type="text" class="form-control" id="lastName" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="email">Email:</label>
+                            <input type="email" class="form-control" id="email" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="phone">Phone:</label>
+                            <input type="tel" class="form-control" id="phone">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="role">Role:</label>
+                            <select class="form-control" id="role" required>
+                                <option value="">Select Role</option>
+                                <option value="CUSTOMER">Customer</option>
+                                <option value="SAFARI_GUIDE">Guide</option>
+                                <option value="STAFF">Staff</option>
+                                <option value="IT_ASSISTANT">IT Assistant</option>
+                                <option value="IT_SUPPORT">IT Support</option>
+                                <option value="ADMIN">Administrator</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="password">Password:</label>
+                            <input type="password" class="form-control" id="password" required>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-modal btn-cancel" onclick="closeModal('addUserModal')">
+                    <i class="fas fa-times"></i>
+                    Cancel
+                </button>
+                <button type="submit" class="btn-modal btn-primary" form="addUserForm">
+                    <i class="fas fa-save"></i>
+                    Save User
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Trip Modal -->
+    <div id="addTripModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">
+                    <i class="fas fa-route"></i>
+                    Add New Trip
+                </h3>
+                <button class="close" onclick="closeModal('addTripModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="addTripForm">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label" for="tripDate">Date:</label>
+                            <input type="date" class="form-control" id="tripDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="startTime">Start Time:</label>
+                            <input type="time" class="form-control" id="startTime" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="endTime">End Time:</label>
+                            <input type="time" class="form-control" id="endTime" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="route">Route:</label>
+                            <input type="text" class="form-control" id="route" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="capacity">Capacity:</label>
+                            <input type="number" class="form-control" id="capacity" min="1" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="price">Price ($):</label>
+                            <input type="number" step="0.01" class="form-control" id="price" min="0" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="boat">Boat:</label>
+                            <select class="form-control" id="boat">
+                                <option value="">Select Boat</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="guide">Guide:</label>
+                            <select class="form-control" id="guide">
+                                <option value="">Select Guide</option>
+                            </select>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-modal btn-cancel" onclick="closeModal('addTripModal')">
+                    <i class="fas fa-times"></i>
+                    Cancel
+                </button>
+                <button type="submit" class="btn-modal btn-primary" form="addTripForm">
+                    <i class="fas fa-save"></i>
+                    Save Trip
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Trip Modal -->
+    <div id="editTripModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">
+                    <i class="fas fa-edit"></i>
+                    Edit Trip
+                </h3>
+                <button class="close" onclick="closeModal('editTripModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="editTripForm">
+                    <input type="hidden" id="editTripId">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label" for="editTripDate">Date:</label>
+                            <input type="date" class="form-control" id="editTripDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="editStartTime">Start Time:</label>
+                            <input type="time" class="form-control" id="editStartTime" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="editEndTime">End Time:</label>
+                            <input type="time" class="form-control" id="editEndTime" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="editRoute">Route:</label>
+                            <input type="text" class="form-control" id="editRoute" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="editCapacity">Capacity:</label>
+                            <input type="number" class="form-control" id="editCapacity" min="1" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="editPrice">Price ($):</label>
+                            <input type="number" step="0.01" class="form-control" id="editPrice" min="0" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="editBoat">Boat:</label>
+                            <select class="form-control" id="editBoat">
+                                <option value="">Select Boat</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="editGuide">Guide:</label>
+                            <select class="form-control" id="editGuide">
+                                <option value="">Select Guide</option>
+                            </select>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-modal btn-cancel" onclick="closeModal('editTripModal')">
+                    <i class="fas fa-times"></i>
+                    Cancel
+                </button>
+                <button type="submit" class="btn-modal btn-primary" form="editTripForm">
+                    <i class="fas fa-save"></i>
+                    Update Trip
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Staff Modal -->
+    <div id="addStaffModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">
+                    <i class="fas fa-user-tie"></i>
+                    Add Staff Member
+                </h3>
+                <button class="close" onclick="closeModal('addStaffModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="addStaffForm">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label" for="staffFirstName">First Name:</label>
+                            <input type="text" class="form-control" id="staffFirstName" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="staffLastName">Last Name:</label>
+                            <input type="text" class="form-control" id="staffLastName" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="staffEmail">Email:</label>
+                            <input type="email" class="form-control" id="staffEmail" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="staffPhone">Phone:</label>
+                            <input type="tel" class="form-control" id="staffPhone" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="staffRole">Role:</label>
+                            <select class="form-control" id="staffRole" required>
+                                <option value="">Select Role</option>
+                                <option value="SAFARI_GUIDE">Guide</option>
+                                <option value="STAFF">Staff</option>
+                                <option value="IT_ASSISTANT">IT Assistant</option>
+                                <option value="IT_SUPPORT">IT Support</option>
+                                <option value="ADMIN">Administrator</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="staffPassword">Password:</label>
+                            <input type="password" class="form-control" id="staffPassword" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="hireDate">Hire Date:</label>
+                            <input type="date" class="form-control" id="hireDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="salary">Salary ($):</label>
+                            <input type="number" step="0.01" class="form-control" id="salary" min="0">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-modal btn-cancel" onclick="closeModal('addStaffModal')">
+                    <i class="fas fa-times"></i>
+                    Cancel
+                </button>
+                <button type="submit" class="btn-modal btn-primary" form="addStaffForm">
+                    <i class="fas fa-save"></i>
+                    Save Staff Member
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Boat Modal -->
+    <div id="addBoatModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">
+                    <i class="fas fa-ship"></i>
+                    Add New Boat
+                </h3>
+                <button class="close" onclick="closeModal('addBoatModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="addBoatForm">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label" for="boatName">Boat Name:</label>
+                            <input type="text" class="form-control" id="boatName" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="boatModel">Model:</label>
+                            <input type="text" class="form-control" id="boatModel" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="boatType">Type:</label>
+                            <select class="form-control" id="boatType" required>
+                                <option value="">Select Type</option>
+                                <option value="Safari Boat">Safari Boat</option>
+                                <option value="Speed Boat">Speed Boat</option>
+                                <option value="Yacht">Yacht</option>
+                                <option value="Catamaran">Catamaran</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="boatCapacity">Capacity:</label>
+                            <input type="number" class="form-control" id="boatCapacity" min="1" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="registrationNumber">Registration Number:</label>
+                            <input type="text" class="form-control" id="registrationNumber" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="boatStatus">Status:</label>
+                            <select class="form-control" id="boatStatus" required>
+                                <option value="">Select Status</option>
+                                <option value="AVAILABLE">Available</option>
+                                <option value="MAINTENANCE">Maintenance</option>
+                                <option value="OUT_OF_SERVICE">Out of Service</option>
+                            </select>
+                        </div>
+                        <div class="form-group full-width">
+                            <label class="form-label" for="boatFeatures">Features:</label>
+                            <textarea class="form-control" id="boatFeatures" rows="3" placeholder="Enter boat features (e.g., GPS, life jackets, sound system...)"></textarea>
+                        </div>
+                        <div class="form-group full-width">
+                            <label class="form-label" for="boatDescription">Description:</label>
+                            <textarea class="form-control" id="boatDescription" rows="3" placeholder="Enter boat description..."></textarea>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-modal btn-cancel" onclick="closeModal('addBoatModal')">
+                    <i class="fas fa-times"></i>
+                    Cancel
+                </button>
+                <button type="submit" class="btn-modal btn-primary" form="addBoatForm">
+                    <i class="fas fa-save"></i>
+                    Save Boat
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Boat Modal -->
+    <div id="editBoatModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">
+                    <i class="fas fa-edit"></i>
+                    Edit Boat
+                </h3>
+                <button class="close" onclick="closeModal('editBoatModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="editBoatForm">
+                    <input type="hidden" id="editBoatId">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label" for="editBoatName">Boat Name:</label>
+                            <input type="text" class="form-control" id="editBoatName" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="editBoatModel">Model:</label>
+                            <input type="text" class="form-control" id="editBoatModel" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="editBoatType">Type:</label>
+                            <select class="form-control" id="editBoatType" required>
+                                <option value="">Select Type</option>
+                                <option value="Safari Boat">Safari Boat</option>
+                                <option value="Speed Boat">Speed Boat</option>
+                                <option value="Yacht">Yacht</option>
+                                <option value="Catamaran">Catamaran</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="editBoatCapacity">Capacity:</label>
+                            <input type="number" class="form-control" id="editBoatCapacity" min="1" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="editRegistrationNumber">Registration Number:</label>
+                            <input type="text" class="form-control" id="editRegistrationNumber" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="editBoatStatus">Status:</label>
+                            <select class="form-control" id="editBoatStatus" required>
+                                <option value="">Select Status</option>
+                                <option value="AVAILABLE">Available</option>
+                                <option value="MAINTENANCE">Maintenance</option>
+                                <option value="OUT_OF_SERVICE">Out of Service</option>
+                            </select>
+                        </div>
+                        <div class="form-group full-width">
+                            <label class="form-label" for="editBoatFeatures">Features:</label>
+                            <textarea class="form-control" id="editBoatFeatures" rows="3" placeholder="Enter boat features (e.g., GPS, life jackets, sound system...)"></textarea>
+                        </div>
+                        <div class="form-group full-width">
+                            <label class="form-label" for="editBoatDescription">Description:</label>
+                            <textarea class="form-control" id="editBoatDescription" rows="3" placeholder="Enter boat description..."></textarea>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-modal btn-cancel" onclick="closeModal('editBoatModal')">
+                    <i class="fas fa-times"></i>
+                    Cancel
+                </button>
+                <button type="submit" class="btn-modal btn-primary" form="editBoatForm">
+                    <i class="fas fa-save"></i>
+                    Update Boat
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Boat Status Update Modal -->
+    <div id="statusModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">
+                    <i class="fas fa-cog"></i>
+                    Update Boat Status
+                </h3>
+                <button class="close" onclick="closeModal('statusModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="statusModalContent">
+                    <p id="statusBoatInfo" class="status-info">
+                        <strong>Boat:</strong> <span id="statusBoatName"></span>
+                    </p>
+                    <div class="form-group">
+                        <label class="form-label" for="newStatus">New Status:</label>
+                        <select class="form-control" id="newStatus" required>
+                            <option value="AVAILABLE">Available</option>
+                            <option value="MAINTENANCE">Maintenance</option>
+                            <option value="OUT_OF_SERVICE">Out of Service</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-modal btn-cancel" onclick="closeModal('statusModal')">
+                    <i class="fas fa-times"></i>
+                    Cancel
+                </button>
+                <button type="button" class="btn-modal btn-primary" onclick="confirmStatusUpdate()">
+                    <i class="fas fa-check"></i>
+                    Update Status
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteConfirmationModal" class="modal">
+        <div class="modal-content" style="max-width: 450px;">
+            <div class="modal-header">
+                <h3 class="modal-title">
+                    <i class="fas fa-exclamation-triangle" style="color: var(--danger);"></i>
+                    Confirm Delete
+                </h3>
+                <button class="close" onclick="closeModal('deleteConfirmationModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p style="text-align: center; font-size: 16px; margin-bottom: 1.5rem; color: var(--dark-blue);">
+                    Are you sure you want to delete this trip?
+                </p>
+                <p style="text-align: center; font-size: 14px; color: var(--text-muted);">
+                    <strong>This action cannot be undone.</strong>
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-modal btn-cancel" onclick="closeModal('deleteConfirmationModal')">
+                    <i class="fas fa-times"></i>
+                    Cancel
+                </button>
+                <button type="button" class="btn-modal btn-danger" onclick="confirmTripDeletion()" style="background: var(--danger); border-color: var(--danger);">
+                    <i class="fas fa-trash"></i>
+                    Delete Trip
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Boat Confirmation Modal -->
+    <div id="deleteBoatConfirmationModal" class="modal">
+        <div class="modal-content" style="max-width: 450px;">
+            <div class="modal-header">
+                <h3 class="modal-title">
+                    <i class="fas fa-exclamation-triangle" style="color: var(--danger);"></i>
+                    Confirm Delete
+                </h3>
+                <button class="close" onclick="closeModal('deleteBoatConfirmationModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p style="text-align: center; font-size: 16px; margin-bottom: 1rem; color: var(--dark-blue);">
+                    Are you sure you want to delete boat
+                </p>
+                <p style="text-align: center; font-size: 18px; font-weight: bold; margin-bottom: 1.5rem; color: var(--primary);" id="boatNameToDelete">
+                    <!-- Boat name will be inserted here -->
+                </p>
+                <p style="text-align: center; font-size: 14px; color: var(--text-muted);">
+                    <strong>This action cannot be undone.</strong>
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-modal btn-cancel" onclick="closeModal('deleteBoatConfirmationModal')">
+                    <i class="fas fa-times"></i>
+                    Cancel
+                </button>
+                <button type="button" class="btn-modal btn-danger" onclick="confirmBoatDeletion()" style="background: var(--danger); border-color: var(--danger);">
+                    <i class="fas fa-trash"></i>
+                    Delete Boat
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cancel Booking Confirmation Modal -->
+    <div id="cancelBookingConfirmationModal" class="modal">
+        <div class="modal-content" style="max-width: 450px;">
+            <div class="modal-header">
+                <h3 class="modal-title">
+                    <i class="fas fa-exclamation-triangle" style="color: var(--danger);"></i>
+                    Confirm Booking Cancellation
+                </h3>
+                <button class="close" onclick="closeModal('cancelBookingConfirmationModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p style="text-align: center; font-size: 16px; margin-bottom: 1rem; color: var(--dark-blue);">
+                    Are you sure you want to cancel the booking for
+                </p>
+                <p style="text-align: center; font-size: 18px; font-weight: bold; margin-bottom: 1.5rem; color: var(--primary);" id="customerNameToCancel">
+                    <!-- Customer name will be inserted here -->
+                </p>
+                <p style="text-align: center; font-size: 14px; color: var(--text-muted);">
+                    <strong>This action cannot be undone.</strong>
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-modal btn-cancel" onclick="closeModal('cancelBookingConfirmationModal')">
+                    <i class="fas fa-times"></i>
+                    Cancel
+                </button>
+                <button type="button" class="btn-modal btn-danger" onclick="confirmBookingCancellation()" style="background: var(--danger); border-color: var(--danger);">
+                    <i class="fas fa-ban"></i>
+                    Cancel Booking
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Staff Confirmation Modal -->
+    <div id="deleteStaffConfirmationModal" class="modal">
+        <div class="modal-content" style="max-width: 450px;">
+            <div class="modal-header">
+                <h3 class="modal-title">
+                    <i class="fas fa-exclamation-triangle" style="color: var(--danger);"></i>
+                    Confirm Staff Deletion
+                </h3>
+                <button class="close" onclick="closeModal('deleteStaffConfirmationModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p style="text-align: center; font-size: 16px; margin-bottom: 1rem; color: var(--dark-blue);">
+                    Are you sure you want to delete staff member
+                </p>
+                <p style="text-align: center; font-size: 18px; font-weight: bold; margin-bottom: 1.5rem; color: var(--primary);" id="staffNameToDelete">
+                    <!-- Staff name will be inserted here -->
+                </p>
+                <p style="text-align: center; font-size: 14px; color: var(--text-muted);">
+                    <strong>This action cannot be undone.</strong>
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-modal btn-cancel" onclick="closeModal('deleteStaffConfirmationModal')">
+                    <i class="fas fa-times"></i>
+                    Cancel
+                </button>
+                <button type="button" class="btn-modal btn-danger" onclick="confirmStaffDeletion()" style="background: var(--danger); border-color: var(--danger);">
+                    <i class="fas fa-user-times"></i>
+                    Delete Staff
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="/assets/js/auth.js"></script>
+    <script src="/assets/js/admin-dashboard.js"></script>
+    
+    <!-- Slide-up Animation Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Trigger slide-up animations
+            const animatedElements = document.querySelectorAll('.slide-up');
+            
+            function animateElement(element) {
+                if (element.getBoundingClientRect().top < window.innerHeight) {
+                    element.classList.add('animate');
+                }
+            }
+            
+            // Initial animation trigger
+            setTimeout(() => {
+                animatedElements.forEach(animateElement);
+            }, 100);
+            
+            // Scroll-triggered animations
+            window.addEventListener('scroll', () => {
+                animatedElements.forEach(animateElement);
+            });
+        });
+    </script>
+</body>
+</html>
